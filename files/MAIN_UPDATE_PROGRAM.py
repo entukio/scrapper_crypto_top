@@ -259,7 +259,7 @@ asset_book = top_500_with_mcap_stablecoins_excluded[['Symbol','Name','Id']]
 
 # load duplicate mapping dictionary
 
-with open('mapping.json', 'r') as json_file:
+with open('/home/entukio/projects/scrapper_crypto_top/files/mapping.json', 'r') as json_file:
     mapping = json.load(json_file)
 mapping_ids = [i.get('Id') for i in mapping]
 
