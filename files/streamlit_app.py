@@ -6,6 +6,8 @@ import altair as alt
 import streamlit as st
 from datetime import datetime, timedelta
 
+files_path = '/home/entukio/projects/scrapper_crypto_top/files/'
+#files_path = 'C:/Users/Daniel/Desktop/Aplikacje Stepaniana/Crypto_Scrapper/Streamlit/TOP_500_data/TESTY/PROGRAM FOR SERVER FINAL/Streamlit/files/crypto_scrapper/scrapper_crypto_top/crypto_scrapper/scrapper_crypto_top/files/'
 
 st.set_page_config(page_title="Crypto Compass",page_icon="🧭",layout="wide")
 
@@ -18,7 +20,9 @@ button[title="View fullscreen"]{
 
 st.markdown(hide_full_screen, unsafe_allow_html=True) 
 
-st.sidebar.image('/home/entukio/projects/scrapper_crypto_top/files/logo.png')
+st.sidebar.image(f'{files_path}logo.png')
+
+chart_color_range = ['#e1a100', '#bdbdbd', '#656565', '#02808b']
 
 
 def stringify_value(value):
@@ -31,9 +35,9 @@ def stringify_value(value):
     else:
         return str(value)
 
-conn=sqlite3.connect('/home/entukio/projects/scrapper_crypto_top/files/top_500_with_Mcap_stablecoins_excluded.db')
+conn=sqlite3.connect(f'{files_path}top_500_with_mcap_stablecoins_excluded.db')
 
-df=pd.read_sql_query('SELECT * FROM top_500_with_Mcap_stablecoins_excluded',conn)
+df=pd.read_sql_query('SELECT * FROM top_500_with_mcap_stablecoins_excluded',conn)
 
 scraping_date = df['Date'][0]
 scraping_date = (scraping_date) + ' UTC'
@@ -303,7 +307,7 @@ def show_Trends(df_trends):
         chart_width = 600
         chart_height = 300
 
-        chart_color_range = ['#e1a100', '#bdbdbd', '#656565', '#02808b']
+        
 
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -470,7 +474,75 @@ def market_overview():
         )
         # Display the chart using st.altair_chart
         st.altair_chart(chart_mas, use_container_width=True)
+    with col1_2:
+        st.subheader(f"Total Crypto Market Cap")
 
+        total_last_30d = total.tail(30).copy()
+        total_last_30d['Total Market Cap'] = total_last_30d['Total Market Cap'].astype(float)
+    
+        # Calculate y-axis limits
+        y_min_total = total_last_30d[['Total Market Cap', 'EMA23', 'EMA56', 'SMA200']].min().min() * 0.8
+        y_max_total = total_last_30d[['Total Market Cap', 'EMA23', 'EMA56', 'SMA200']].max().max() * 1.2
+
+        # Melt the DataFrame to long format for easier plotting
+        total_long = total_last_30d.melt(id_vars='Date', var_name='Total Market Cap', value_name='Value')
+        total_long = total_long[total_long['Total Market Cap'].isin(['Total Market Cap', 'EMA23', 'EMA56', 'SMA200'])].copy()
+
+
+        # Create Altair chart
+        chart_total = alt.Chart(total_long).mark_line().encode(
+            x=alt.X('Date:T', axis=alt.Axis(title='Date', format='%Y-%m-%d', grid=True, labelAngle=-90)),
+            y=alt.Y('Value:Q', scale=alt.Scale(domain=[y_min_total, y_max_total])),
+            color=alt.Color('Total Market Cap:N', scale=alt.Scale(domain=['Total Market Cap', 'EMA23', 'EMA56', 'SMA200'], range=chart_color_range))
+        ).properties(
+            width=600,
+            height=350
+        )
+
+        # Display the chart using st.altair_chart
+        st.altair_chart(chart_total, use_container_width=True)
+
+        ### total altcoin
+
+        st.subheader(f"Altcoin Market Cap")
+
+        total3_last_30d = total3.tail(30).copy()
+        total3_last_30d['Altcoin Market Cap'] = total3_last_30d['Altcoin Market Cap'].astype(float)
+    
+        # Calculate y-axis limits
+        y_min_total3 = total3_last_30d[['Altcoin Market Cap', 'EMA23', 'EMA56', 'SMA200']].min().min() * 0.8
+        y_max_total3 = total3_last_30d[['Altcoin Market Cap', 'EMA23', 'EMA56', 'SMA200']].max().max() * 1.2
+
+        # Melt the DataFrame to long format for easier plotting
+        total3_long = total3_last_30d.melt(id_vars='Date', var_name='Altcoin Market Cap', value_name='Value')
+        total3_long = total3_long[total3_long['Altcoin Market Cap'].isin(['Altcoin Market Cap', 'EMA23', 'EMA56', 'SMA200'])].copy()
+
+
+        # Create Altair chart
+        chart_total3 = alt.Chart(total3_long).mark_line().encode(
+            x=alt.X('Date:T', axis=alt.Axis(title='Date', format='%Y-%m-%d', grid=True, labelAngle=-90)),
+            y=alt.Y('Value:Q', scale=alt.Scale(domain=[y_min_total3, y_max_total3])),
+            color=alt.Color('Altcoin Market Cap:N', scale=alt.Scale(domain=['Altcoin Market Cap', 'EMA23', 'EMA56', 'SMA200'], range=chart_color_range))
+        ).properties(
+            width=600,
+            height=350
+        )
+
+        # Display the chart using st.altair_chart
+        st.altair_chart(chart_total3, use_container_width=True)
+
+    with col_1_3:
+        st.subheader('''
+        Total crypto market in in uptrend that has consolidated, but still above SMA 200, which indicates a bull market.
+                 ''')
+        st.write('Trend: 🟢    200 MA: 🟢')
+        st.divider()
+
+        st.subheader('''
+        Total Altcoin Market still strong that has consolidated, but still above SMA 200.
+                 ''')
+        st.write('Trend: 🟢    200 MA: 🟢')
+        st.divider()
 
 page = st.sidebar.radio("Menu", ["Market Overview","Trends", "Market Caps"])
 
@@ -509,7 +581,7 @@ last_3d_trends_df = pd.concat([yesterday_df, two_days_ago_df, three_days_ago_df]
 
 ### Summary stats ###
 
-conn_overview=sqlite3.connect('/home/entukio/projects/scrapper_crypto_top/files/market_overview.db')
+conn_overview=sqlite3.connect(f'{files_path}market_overview.db')
 
 df_overview=pd.read_sql_query('SELECT * FROM market_overview',conn_overview)
 
@@ -534,6 +606,39 @@ Above_200_MA_Perc = df_overview.iloc[-1]['Above_200_MA_Perc']
 Below_200_MA_Perc = df_overview.iloc[-1]['Below_200_MA_Perc']
 No_200_MA_info_Perc = df_overview.iloc[-1]['No_200_MA_info_Perc']
 
+# # #
+
+# Total Market Caps
+total = pd.read_csv(f'{files_path}coin-dance-market-cap-historical.csv',delimiter=";")
+total = total.dropna().copy()
+total = total.rename(columns={'Label':'Date'}).copy()
+
+
+def changeComma(x):
+    return x.replace(',','.')
+
+total = total.rename(columns={'Label':'Date'}).copy()
+total['Altcoin Market Cap'] = total['Altcoin Market Cap'].apply(changeComma)
+total['Bitcoin Market Cap'] = total['Bitcoin Market Cap'].apply(changeComma)
+
+total3 = total[['Date','Altcoin Market Cap']]
+
+total3.loc[:, 'Altcoin Market Cap'] = pd.to_numeric(total3['Altcoin Market Cap'], errors='coerce')
+
+total['Total Market Cap'] = total['Altcoin Market Cap'].astype(float) + total['Bitcoin Market Cap'].astype(float)
+total.drop(columns=['Altcoin Market Cap', 'Bitcoin Market Cap'], inplace=True)
+
+total['EMA23'] = total['Total Market Cap'].ewm(span=23, adjust=False,min_periods=23).mean()
+total['EMA56'] = total['Total Market Cap'].ewm(span=56, adjust=False,min_periods=56).mean()
+total['SMA200'] = total['Total Market Cap'].rolling(window=200).mean()
+total['Long_Trend_Up'] = total['Total Market Cap'] > total['SMA200']
+total['Middle_Trend_Up'] = total['EMA23'] > total['EMA56']
+
+total3['EMA23'] = total3.loc[:, 'Altcoin Market Cap'].ewm(span=23, adjust=False, min_periods=23).mean()
+total3['EMA56'] = total3.loc[:, 'Altcoin Market Cap'].ewm(span=56, adjust=False, min_periods=56).mean()
+total3['SMA200'] = total3.loc[:, 'Altcoin Market Cap'].rolling(window=200).mean()
+total3['Long_Trend_Up'] = total3['Altcoin Market Cap'] > total3['SMA200']
+total3['Middle_Trend_Up'] = total3['EMA23'] > total3['EMA56']
 
 
 # Conditional rendering based on the selected page
