@@ -258,8 +258,8 @@ def show_Trends(df_trends):
         element_show_more = element_show[['Price','Market Cap','ATH Δ','rank_1dΔ','rank_3dΔ']].copy()
         element_show.drop(columns = ['Price','Market Cap','ATH Δ','rank_3dΔ','rank_1dΔ','rank_7dΔ','rank_14dΔ','Vol24h','rank_1dΔ','rank_7dΔ','rank_14dΔ','mcap_1dΔ','mcap_3dΔ','mcap_7dΔ','mcap_14dΔ'],inplace=True)
                 
-        conn = sqlite3.connect(f'/home/entukio/projects/scrapper_crypto_top/files/prices/{element.iloc[0]["Id"]}.db')
-        coin_db = pd.read_sql(f'SELECT * FROM db_{(element.iloc[0]["Name"]).split(' ')[-1]}USD',conn)
+        conn = sqlite3.connect(f"/home/entukio/projects/scrapper_crypto_top/files/prices/{element.iloc[0]['Id']}.db")
+        coin_db = pd.read_sql(f"SELECT * FROM db_{(element.iloc[0]['Name']).split(' ')[-1]}USD",conn)
         conn.close()
 
         coin_db = coin_db.tail(5)
@@ -277,8 +277,8 @@ def show_Trends(df_trends):
 
 
                     
-            conn = sqlite3.connect(f'/home/entukio/projects/scrapper_crypto_top/files/prices/{element_1.iloc[0]["Id"]}.db')
-            coin_db_1 = pd.read_sql(f'SELECT * FROM db_{(element_1.iloc[0]["Name"]).split(' ')[-1]}USD',conn)
+            conn = sqlite3.connect(f"/home/entukio/projects/scrapper_crypto_top/files/prices/{element_1.iloc[0]['Id']}.db")
+            coin_db_1 = pd.read_sql(f"SELECT * FROM db_{(element_1.iloc[0]['Name']).split(' ')[-1]}USD",conn)
             conn.close()
             coin_db_1 = coin_db_1.tail(5)
             coin_db_1['Date'] = pd.to_datetime(coin_db_1['Date'])
@@ -294,8 +294,8 @@ def show_Trends(df_trends):
 
 
                     
-            conn = sqlite3.connect(f'/home/entukio/projects/scrapper_crypto_top/files/prices/{element_2.iloc[0]["Id"]}.db')
-            coin_db_2 = pd.read_sql(f'SELECT * FROM db_{(element_2.iloc[0]["Name"]).split(' ')[-1]}USD',conn)
+            conn = sqlite3.connect(f"/home/entukio/projects/scrapper_crypto_top/files/prices/{element_2.iloc[0]['Id']}.db")
+            coin_db_2 = pd.read_sql(f"SELECT * FROM db_{(element_2.iloc[0]['Name']).split(' ')[-1]}USD",conn)
             conn.close()
             coin_db_2 = coin_db_2.tail(5)
             coin_db_2['Date'] = pd.to_datetime(coin_db_2['Date'])
