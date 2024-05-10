@@ -277,9 +277,9 @@ mapping_ids = [i.get('Id') for i in mapping]
 def MapperLooper(asset_book):
     for i in range(len(asset_book)):
         #####################################
-        identifier = f'{asset_book.iloc[i]['Id']}'
+        identifier = f'{asset_book.iloc[i]["Id"]}'
         db_name = f'{identifier}.db'
-        symbol = f'{asset_book.iloc[i]['Symbol']}USD'
+        symbol = f'{asset_book.iloc[i]["Symbol"]}USD'
         #####################################
         try:
             print('trying')
