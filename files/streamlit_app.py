@@ -5,6 +5,7 @@ import sqlite3
 import altair as alt
 import streamlit as st
 from datetime import datetime, timedelta
+import plotly.express as px
 
 files_path = '/home/entukio/projects/scrapper_crypto_top/files/'
 #files_path = 'C:/Users/Daniel/Desktop/Aplikacje Stepaniana/Crypto_Scrapper/Streamlit/TOP_500_data/TESTY/PROGRAM FOR SERVER FINAL/Streamlit/files/crypto_scrapper/scrapper_crypto_top/crypto_scrapper/scrapper_crypto_top/files/'
@@ -429,37 +430,39 @@ def market_overview():
 
     col1,col2,col3,col4,col5,col6,col7,col8 = st.columns(8)
     with col1:
-        st.write("Total Assets Tracked")
-        st.subheader(Total_coins)
+        #st.info("Total Assets Tracked",icon="💰")
+        st.metric(label="Cryptocurrencies in database",value=f"{Total_coins}")
     with col2:
-        st.write("In Uptrend")
-        st.subheader(In_Uptrend_Perc)
+        #st.info("In Uptrend")
+        st.metric(label="In Uptrend",value=f"{In_Uptrend_Perc}")
     with col3:
-        st.write("In Downtrend")
-        st.subheader(In_Downtrend_Perc)
+        #st.info.write("In Downtrend")
+        st.metric(label="In Downtrend",value=f"{In_Downtrend_Perc}")
     with col4:
-        st.write("No Trend Info")
-        st.subheader(No_Trend_Perc)
+        #st.info.write("No Trend Info")
+        st.metric(label="No Trend Info",value=f"{No_Trend_Perc}")
     with col5:
-        st.write("Above 200 MA")
-        st.subheader(Above_200_MA_Perc)
+        #st.info.write("Above 200 MA")
+        st.metric(label="Above 200 MA",value=f"{Above_200_MA_Perc}")
     with col6:
-        st.write("Below 200 MA")
-        st.subheader(Below_200_MA_Perc)
+        #st.info.write("Below 200 MA")
+        st.metric(label="Below 200 MA",value=f"{Below_200_MA_Perc}")
     with col7:
-        st.write("No MA Info")
-        st.subheader(No_200_MA_info_Perc)
+        #st.info.write("No MA Info")
+        st.metric(label="No MA Info",value=f"{No_200_MA_info_Perc}")
     with col8:
-        st.write("Crypto Fear&Greed Index")
-        st.subheader(Fear_Greed)
+        #st.info.write("Crypto Fear&Greed Index")
+        st.metric(label="Crypto Fear&Greed Index",value=f"{Fear_Greed}")	
 
     st.markdown('---')
 
-    col1_1,col1_2,col_1_3 = st.columns(3)
+    column_widths = [1, 2, 1]
+
+    col1_1,col1_2,col_1_3 = st.columns(column_widths)
     with col1_1:
         source_trends = pd.DataFrame({"Trend Info": ['Uptrend','Downtrend','No trend data'], "value": [In_Uptrend,In_Downtrend,No_Trend_Info]})
 
-        chart_trends = alt.Chart(source_trends).mark_arc(innerRadius=80).encode(
+        chart_trends = alt.Chart(source_trends).mark_arc(innerRadius=50).encode(
             theta="value",
             color=alt.Color(field="Trend Info", type="nominal", scale=alt.Scale(range=['#d10819','#6e6e6e','#0baa02'])), 
         )
@@ -468,7 +471,7 @@ def market_overview():
     
         source_mas = pd.DataFrame({"Position of 200 MA": ['Above 200 MA','Below 200 MA','No 200 MA data'], "value": [Above_200_MA,Below_200_MA,No_200_MA_info]})
 
-        chart_mas = alt.Chart(source_mas).mark_arc(innerRadius=80).encode(
+        chart_mas = alt.Chart(source_mas).mark_arc(innerRadius=50).encode(
             theta="value",
             color=alt.Color(field="Position of 200 MA", type="nominal", scale=alt.Scale(range=['#0baa02', '#d10819', '#6e6e6e'])), 
         )
@@ -480,27 +483,31 @@ def market_overview():
         total_last_30d = total.tail(30).copy()
         total_last_30d['Total Market Cap'] = total_last_30d['Total Market Cap'].astype(float)
     
-        # Calculate y-axis limits
-        y_min_total = total_last_30d[['Total Market Cap', 'EMA23', 'EMA56', 'SMA200']].min().min() * 0.8
-        y_max_total = total_last_30d[['Total Market Cap', 'EMA23', 'EMA56', 'SMA200']].max().max() * 1.2
+        color_map_total = {
+            "Total Market Cap": f"{chart_color_range[0]}",
+            "SMA200": f"{chart_color_range[3]}",
+            "EMA23": f"{chart_color_range[1]}",
+            "EMA56": f"{chart_color_range[2]}",
+        }
 
-        # Melt the DataFrame to long format for easier plotting
-        total_long = total_last_30d.melt(id_vars='Date', var_name='Total Market Cap', value_name='Value')
-        total_long = total_long[total_long['Total Market Cap'].isin(['Total Market Cap', 'EMA23', 'EMA56', 'SMA200'])].copy()
-
-
-        # Create Altair chart
-        chart_total = alt.Chart(total_long).mark_line().encode(
-            x=alt.X('Date:T', axis=alt.Axis(title='Date', format='%Y-%m-%d', grid=True, labelAngle=-90)),
-            y=alt.Y('Value:Q', scale=alt.Scale(domain=[y_min_total, y_max_total])),
-            color=alt.Color('Total Market Cap:N', scale=alt.Scale(domain=['Total Market Cap', 'EMA23', 'EMA56', 'SMA200'], range=chart_color_range))
-        ).properties(
-            width=600,
-            height=350
+        # Create a Plotly figure
+        fig_total = px.line(
+            total_last_30d,
+            x="Date",
+            y=["Total Market Cap", "SMA200", "EMA23", "EMA56"],  # Include all required columns
+            labels={"value": "Market Cap USD", "variable": "Indicator", "Date": "Date"},  # Customize axis labels
+            color_discrete_map=color_map_total  # Specify custom colors
         )
 
-        # Display the chart using st.altair_chart
-        st.altair_chart(chart_total, use_container_width=True)
+        # Customize the layout if needed
+        fig_total.update_layout(
+            title="Total Crypto Market Cap",
+            xaxis_title="Date",
+            yaxis_title="Value",
+        )
+
+        # Display the Plotly chart using st.plotly_chart
+        st.plotly_chart(fig_total)
 
         ### total altcoin
 
@@ -508,40 +515,47 @@ def market_overview():
 
         total3_last_30d = total3.tail(30).copy()
         total3_last_30d['Altcoin Market Cap'] = total3_last_30d['Altcoin Market Cap'].astype(float)
-    
-        # Calculate y-axis limits
-        y_min_total3 = total3_last_30d[['Altcoin Market Cap', 'EMA23', 'EMA56', 'SMA200']].min().min() * 0.8
-        y_max_total3 = total3_last_30d[['Altcoin Market Cap', 'EMA23', 'EMA56', 'SMA200']].max().max() * 1.2
 
-        # Melt the DataFrame to long format for easier plotting
-        total3_long = total3_last_30d.melt(id_vars='Date', var_name='Altcoin Market Cap', value_name='Value')
-        total3_long = total3_long[total3_long['Altcoin Market Cap'].isin(['Altcoin Market Cap', 'EMA23', 'EMA56', 'SMA200'])].copy()
+      
+        color_map_total3 = {
+            "Altcoin Market Cap": f"{chart_color_range[0]}",
+            "SMA200": f"{chart_color_range[3]}",
+            "EMA23": f"{chart_color_range[1]}",
+            "EMA56": f"{chart_color_range[2]}",
+        }
 
-
-        # Create Altair chart
-        chart_total3 = alt.Chart(total3_long).mark_line().encode(
-            x=alt.X('Date:T', axis=alt.Axis(title='Date', format='%Y-%m-%d', grid=True, labelAngle=-90)),
-            y=alt.Y('Value:Q', scale=alt.Scale(domain=[y_min_total3, y_max_total3])),
-            color=alt.Color('Altcoin Market Cap:N', scale=alt.Scale(domain=['Altcoin Market Cap', 'EMA23', 'EMA56', 'SMA200'], range=chart_color_range))
-        ).properties(
-            width=600,
-            height=350
+        # Create a Plotly figure
+        fig_total3 = px.line(
+            total3_last_30d,
+            x="Date",
+            y=["Altcoin Market Cap", "SMA200", "EMA23", "EMA56"],  # Include all required columns
+            labels={"value": "Market Cap USD", "variable": "Indicator", "Date": "Date"},  # Customize axis labels
+            color_discrete_map=color_map_total3  # Specify custom colors
         )
 
-        # Display the chart using st.altair_chart
-        st.altair_chart(chart_total3, use_container_width=True)
+        # Customize the layout if needed
+        fig_total3.update_layout(
+            title="Total Market Cap 2, Bitcoin Excluded",
+            xaxis_title="Date",
+            yaxis_title="Value",
+        )
+
+        # Display the Plotly chart using st.plotly_chart
+        st.plotly_chart(fig_total3)
+
+
 
     with col_1_3:
         st.subheader('''
         Total crypto market in in uptrend that has consolidated, but still above SMA 200, which indicates a bull market.
                  ''')
-        st.write('Trend: 🟢    200 MA: 🟢')
+        st.write('Trend: 🔴    200 MA: 🟢')
         st.divider()
 
         st.subheader('''
-        Total Altcoin Market still strong that has consolidated, but still above SMA 200.
+        Lorem Ipsum Total Altcoin Market still strong that has consolidated, but still above SMA 200.
                  ''')
-        st.write('Trend: 🟢    200 MA: 🟢')
+        st.write('Trend: 🔴    200 MA: 🟢')
         st.divider()
 
 page = st.sidebar.radio("Menu", ["Market Overview","Trends", "Market Caps"])
@@ -622,6 +636,7 @@ total['Altcoin Market Cap'] = total['Altcoin Market Cap'].apply(changeComma)
 total['Bitcoin Market Cap'] = total['Bitcoin Market Cap'].apply(changeComma)
 
 total3 = total[['Date','Altcoin Market Cap']]
+total3['Altcoin Market Cap'] = total3['Altcoin Market Cap'].astype(float)
 
 total3.loc[:, 'Altcoin Market Cap'] = pd.to_numeric(total3['Altcoin Market Cap'], errors='coerce')
 

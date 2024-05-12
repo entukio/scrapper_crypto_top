@@ -1,0 +1,64 @@
+Usage: streamlit run [OPTIONS] TARGET [ARGS]...
+Try 'streamlit run --help' for help.
+
+Error: Invalid value: File does not exist: your_app.py
+Usage: streamlit run [OPTIONS] TARGET [ARGS]...
+Try 'streamlit run --help' for help.
+
+Error: Invalid value: File does not exist: your_app.py
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://10.132.0.3:8502
+  External URL: http://34.77.76.246:8502
+
+  Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://10.132.0.3:8502
+  External URL: http://34.77.76.246:8502
+
+
+  A new version of Streamlit is available.
+
+  See what's new at https://discuss.streamlit.io/c/announcements
+
+  Enter the following command to upgrade:
+  $ pip install streamlit --upgrade
+
+  Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://10.132.0.3:8502
+  External URL: http://34.77.76.246:8502
+
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://10.132.0.3:8503
+  External URL: http://34.77.76.246:8503
+
+  Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://10.132.0.3:8503
+  External URL: http://34.77.76.246:8503
+

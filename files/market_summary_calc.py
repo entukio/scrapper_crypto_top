@@ -2,9 +2,9 @@ import pandas as pd
 import sqlite3
 from datetime import datetime, timedelta
 
-conn=sqlite3.connect('/home/entukio/projects/scrapper_crypto_top/files/top_500_with_Mcap_stablecoins_excluded.db')
+conn=sqlite3.connect('/home/entukio/projects/scrapper_crypto_top/files/top_500_with_mcap_stablecoins_excluded.db')
 
-df_final=pd.read_sql_query('SELECT * FROM top_500_with_Mcap_stablecoins_excluded',conn)
+df_final=pd.read_sql_query('SELECT * FROM top_500_with_mcap_stablecoins_excluded',conn)
 
 conn.close()
 
