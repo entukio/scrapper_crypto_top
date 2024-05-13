@@ -263,11 +263,11 @@ def show_Trends(df_trends):
         element_show_more = element_show[['Price','Market Cap','ATH Δ','rank_1dΔ','rank_3dΔ']].copy()
         element_show.drop(columns = ['Price','Market Cap','ATH Δ','rank_3dΔ','rank_1dΔ','rank_7dΔ','rank_14dΔ','Vol24h','rank_1dΔ','rank_7dΔ','rank_14dΔ','mcap_1dΔ','mcap_3dΔ','mcap_7dΔ','mcap_14dΔ'],inplace=True)
                 
-        conn = sqlite3.connect(f"/home/entukio/projects/scrapper_crypto_top/files/prices/{element.iloc[0]['Id']}.db")
+        conn = sqlite3.connect(f"{files_path}prices/{element.iloc[0]['Id']}.db")
         coin_db = pd.read_sql(f"SELECT * FROM db_{(element.iloc[0]['Name']).split(' ')[-1]}USD",conn)
         conn.close()
 
-        coin_db = coin_db.tail(5)
+        coin_db = coin_db.tail(14)
         coin_db['Date'] = pd.to_datetime(coin_db['Date'])
      
 
@@ -282,10 +282,10 @@ def show_Trends(df_trends):
 
 
                     
-            conn = sqlite3.connect(f"/home/entukio/projects/scrapper_crypto_top/files/prices/{element_1.iloc[0]['Id']}.db")
+            conn = sqlite3.connect(f"{files_path}prices/{element_1.iloc[0]['Id']}.db")
             coin_db_1 = pd.read_sql(f"SELECT * FROM db_{(element_1.iloc[0]['Name']).split(' ')[-1]}USD",conn)
             conn.close()
-            coin_db_1 = coin_db_1.tail(5)
+            coin_db_1 = coin_db_1.tail(14)
             coin_db_1['Date'] = pd.to_datetime(coin_db_1['Date'])
         
         if i + 2 < num_charts:
@@ -299,16 +299,18 @@ def show_Trends(df_trends):
 
 
                     
-            conn = sqlite3.connect(f"/home/entukio/projects/scrapper_crypto_top/files/prices/{element_2.iloc[0]['Id']}.db")
+            conn = sqlite3.connect(f"{files_path}prices/{element_2.iloc[0]['Id']}.db")
             coin_db_2 = pd.read_sql(f"SELECT * FROM db_{(element_2.iloc[0]['Name']).split(' ')[-1]}USD",conn)
             conn.close()
-            coin_db_2 = coin_db_2.tail(5)
+            coin_db_2 = coin_db_2.tail(14)
             coin_db_2['Date'] = pd.to_datetime(coin_db_2['Date'])
 
-        chart_width = 600
-        chart_height = 300
+        chart_width = 400
+        chart_height = 400
 
-        
+        plotly_config = {'displayModeBar': False}
+
+
 
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -318,26 +320,37 @@ def show_Trends(df_trends):
             # Plotting
             #######
             # Calculate y-axis limits
-            y_min = coin_db[['Close', 'EMA23', 'EMA56', 'SMA200']].min().min() * 0.8
-            y_max = coin_db[['Close', 'EMA23', 'EMA56', 'SMA200']].max().max() * 1.2
+            color_map_coindb_1 = {
+                "Close": f"{chart_color_range[0]}",
+                "SMA200": f"{chart_color_range[3]}",
+                "EMA23": f"{chart_color_range[1]}",
+                "EMA56": f"{chart_color_range[2]}",
+            }
 
-            # Melt the DataFrame to long format for easier plotting
-            coin_db_long = coin_db.melt(id_vars='Date', var_name='Line', value_name='Value')
-
-            coin_db_long = coin_db_long[coin_db_long['Line'].isin(['Close', 'EMA23', 'EMA56', 'SMA200'])].copy()
-
-            # Create Altair chart
-            chart = alt.Chart(coin_db_long).mark_line().encode(
-                x=alt.X('Date:T', axis=alt.Axis(title='Date', format='%Y-%m-%d', grid=True, labelAngle=-90)),
-                y=alt.Y('Value:Q', scale=alt.Scale(domain=[y_min, y_max])),
-                color=alt.Color('Line:N', scale=alt.Scale(domain=['Close', 'EMA23', 'EMA56', 'SMA200'], range=chart_color_range))
-            ).properties(
-                width=chart_width,
-                height=chart_height
+           # Create a Plotly figure
+            fig_coin_1 = px.line(
+                coin_db,
+                x="Date",
+                y=["Close", "SMA200", "EMA23", "EMA56"],  # Include all required columns
+                labels={"value": "Close Price", "variable": "Indicator", "Date": "Date"},  # Customize axis labels
+                color_discrete_map=color_map_coindb_1  # Specify custom colors
             )
 
-            # Display the chart using st.altair_chart
-            st.altair_chart(chart, use_container_width=True)
+            # Customize the layout if needed
+            fig_coin_1.update_layout(
+                title="",
+                xaxis_title="Date",
+                yaxis_title="Value",
+                width=chart_width,
+                height=chart_height,
+                xaxis=dict(fixedrange=True),  # Disable zoom for x-axis
+                yaxis=dict(fixedrange=True),  # Disable zoom for y-axis
+
+            )
+
+            # Display the Plotly chart using st.plotly_chart
+            st.plotly_chart(fig_coin_1,config=plotly_config)
+
 
 
         if i + 1 < num_charts:
@@ -346,26 +359,31 @@ def show_Trends(df_trends):
                 st.dataframe(data=element_show_1,hide_index=True)
                 st.dataframe(data=element_show_1_more,hide_index=True)
                 # Plotting
-                # Calculate y-axis limits
-                y_min_1 = coin_db_1[['Close', 'EMA23', 'EMA56', 'SMA200']].min().min() * 0.8
-                y_max_1 = coin_db_1[['Close', 'EMA23', 'EMA56', 'SMA200']].max().max() * 1.2
 
-                # Melt the DataFrame to long format for easier plotting
-                coin_db_long_1 = coin_db_1.melt(id_vars='Date', var_name='Line', value_name='Value')
-                coin_db_long_1 = coin_db_long_1[coin_db_long_1['Line'].isin(['Close', 'EMA23', 'EMA56', 'SMA200'])].copy()
 
-                # Create Altair chart
-                chart_1 = alt.Chart(coin_db_long_1).mark_line().encode(
-                    x=alt.X('Date:T', axis=alt.Axis(title='Date', format='%Y-%m-%d', grid=True, labelAngle=-90)),
-                    y=alt.Y('Value:Q', scale=alt.Scale(domain=[y_min_1, y_max_1])),
-                    color=alt.Color('Line:N', scale=alt.Scale(domain=['Close', 'EMA23', 'EMA56', 'SMA200'], range=chart_color_range))
-                ).properties(
-                    width=chart_width,
-                    height=chart_height
+                 # Create a Plotly figure
+                fig_coin_2 = px.line(
+                    coin_db_1,
+                    x="Date",
+                    y=["Close", "SMA200", "EMA23", "EMA56"],  # Include all required columns
+                    labels={"value": "Close Price", "variable": "Indicator", "Date": "Date"},  # Customize axis labels
+                    color_discrete_map=color_map_coindb_1  # Specify custom colors
                 )
 
-                # Display the chart using st.altair_chart
-                st.altair_chart(chart_1, use_container_width=True)
+                # Customize the layout if needed
+                fig_coin_2.update_layout(
+                    title="",
+                    xaxis_title="Date",
+                    yaxis_title="Value",
+                    width=chart_width,
+                    height=chart_height,
+                    xaxis=dict(fixedrange=True),  # Disable zoom for x-axis
+                    yaxis=dict(fixedrange=True),  # Disable zoom for y-axis
+
+                )
+
+                # Display the Plotly chart using st.plotly_chart
+                st.plotly_chart(fig_coin_2,config=plotly_config)
 
         if i + 2 < num_charts:
             with col3:
@@ -374,25 +392,29 @@ def show_Trends(df_trends):
                 st.dataframe(data=element_show_2_more,hide_index=True)
                 # Plotting
                 # Calculate y-axis limits
-                y_min_2 = coin_db_2[['Close', 'EMA23', 'EMA56', 'SMA200']].min().min() * 0.8
-                y_max_2 = coin_db_2[['Close', 'EMA23', 'EMA56', 'SMA200']].max().max() * 1.2
-
-                # Melt the DataFrame to long format for easier plotting
-                coin_db_long_2 = coin_db_2.melt(id_vars='Date', var_name='Line', value_name='Value')
-                coin_db_long_2 = coin_db_long_2[coin_db_long_2['Line'].isin(['Close', 'EMA23', 'EMA56', 'SMA200'])].copy()
-
-                # Create Altair chart
-                chart_2 = alt.Chart(coin_db_long_2).mark_line().encode(
-                    x=alt.X('Date:T', axis=alt.Axis(title='Date', format='%Y-%m-%d', grid=True, labelAngle=-90)),
-                    y=alt.Y('Value:Q', scale=alt.Scale(domain=[y_min_2, y_max_2])),
-                    color=alt.Color('Line:N', scale=alt.Scale(domain=['Close', 'EMA23', 'EMA56', 'SMA200'], range=chart_color_range))
-                ).properties(
-                    width=chart_width,
-                    height=chart_height
+                # Create a Plotly figure
+                fig_coin_3 = px.line(
+                    coin_db_2,
+                    x="Date",
+                    y=["Close", "SMA200", "EMA23", "EMA56"],  # Include all required columns
+                    labels={"value": "Close Price", "variable": "Indicator", "Date": "Date"},  # Customize axis labels
+                    color_discrete_map=color_map_coindb_1  # Specify custom colors
                 )
 
-                # Display the chart using st.altair_chart
-                st.altair_chart(chart_2, use_container_width=True)
+                # Customize the layout if needed
+                fig_coin_3.update_layout(
+                    title="",
+                    xaxis_title="Date",
+                    yaxis_title="Value",
+                    width=chart_width,
+                    height=chart_height,
+                    xaxis=dict(fixedrange=True),  # Disable zoom for x-axis
+                    yaxis=dict(fixedrange=True),  # Disable zoom for y-axis
+
+                )
+
+                # Display the Plotly chart using st.plotly_chart
+                st.plotly_chart(fig_coin_3,config=plotly_config)
 
         
         
@@ -431,7 +453,7 @@ def market_overview():
     col1,col2,col3,col4,col5,col6,col7,col8 = st.columns(8)
     with col1:
         #st.info("Total Assets Tracked",icon="💰")
-        st.metric(label="Cryptocurrencies in database",value=f"{Total_coins}")
+        st.metric(label="Tracked assets",value=f"{Total_coins}")
     with col2:
         #st.info("In Uptrend")
         st.metric(label="In Uptrend",value=f"{In_Uptrend_Perc}")
@@ -452,31 +474,16 @@ def market_overview():
         st.metric(label="No MA Info",value=f"{No_200_MA_info_Perc}")
     with col8:
         #st.info.write("Crypto Fear&Greed Index")
-        st.metric(label="Crypto Fear&Greed Index",value=f"{Fear_Greed}")	
+        st.metric(label="Crypto Fear&Greed Index",value=f"{Fear_Greed}")
 
     st.markdown('---')
 
-    column_widths = [1, 2, 1]
+    column_widths = [4, 2]
 
-    col1_1,col1_2,col_1_3 = st.columns(column_widths)
-    with col1_1:
-        source_trends = pd.DataFrame({"Trend Info": ['Uptrend','Downtrend','No trend data'], "value": [In_Uptrend,In_Downtrend,No_Trend_Info]})
+    col1_2,col_1_3 = st.columns(column_widths)
 
-        chart_trends = alt.Chart(source_trends).mark_arc(innerRadius=50).encode(
-            theta="value",
-            color=alt.Color(field="Trend Info", type="nominal", scale=alt.Scale(range=['#d10819','#6e6e6e','#0baa02'])), 
-        )
-        # Display the chart using st.altair_chart
-        st.altair_chart(chart_trends, use_container_width=True)
+    width_charts_total = 620
     
-        source_mas = pd.DataFrame({"Position of 200 MA": ['Above 200 MA','Below 200 MA','No 200 MA data'], "value": [Above_200_MA,Below_200_MA,No_200_MA_info]})
-
-        chart_mas = alt.Chart(source_mas).mark_arc(innerRadius=50).encode(
-            theta="value",
-            color=alt.Color(field="Position of 200 MA", type="nominal", scale=alt.Scale(range=['#0baa02', '#d10819', '#6e6e6e'])), 
-        )
-        # Display the chart using st.altair_chart
-        st.altair_chart(chart_mas, use_container_width=True)
     with col1_2:
         st.subheader(f"Total Crypto Market Cap")
 
@@ -493,6 +500,7 @@ def market_overview():
         # Create a Plotly figure
         fig_total = px.line(
             total_last_30d,
+            width=width_charts_total,
             x="Date",
             y=["Total Market Cap", "SMA200", "EMA23", "EMA56"],  # Include all required columns
             labels={"value": "Market Cap USD", "variable": "Indicator", "Date": "Date"},  # Customize axis labels
@@ -504,11 +512,39 @@ def market_overview():
             title="Total Crypto Market Cap",
             xaxis_title="Date",
             yaxis_title="Value",
+            width=width_charts_total,
+            xaxis=dict(fixedrange=True),  # Disable zoom for x-axis
+            yaxis=dict(fixedrange=True),   # Disable zoom for y-axis
+            legend=dict(
+                orientation="h",  # horizontal legend
+                yanchor="top",
+                y=1.1,
+                xanchor="right",
+                x=1
+            )
         )
 
         # Display the Plotly chart using st.plotly_chart
         st.plotly_chart(fig_total)
 
+        ### total altcoin
+
+
+    with col_1_3:
+        st.subheader('''
+        Total crypto market in in uptrend that has consolidated, but still above SMA 200, which indicates a bull market.
+                 ''')
+        st.write('Trend: 🔴    200 MA: 🟢')
+        st.divider()
+
+
+    #####
+    column_widths_alt = [4, 2]
+
+    col1_2alts,col_1_3alts = st.columns(column_widths_alt)
+    
+    with col1_2alts:
+        
         ### total altcoin
 
         st.subheader(f"Altcoin Market Cap")
@@ -527,6 +563,7 @@ def market_overview():
         # Create a Plotly figure
         fig_total3 = px.line(
             total3_last_30d,
+            width=width_charts_total,
             x="Date",
             y=["Altcoin Market Cap", "SMA200", "EMA23", "EMA56"],  # Include all required columns
             labels={"value": "Market Cap USD", "variable": "Indicator", "Date": "Date"},  # Customize axis labels
@@ -538,25 +575,53 @@ def market_overview():
             title="Total Market Cap 2, Bitcoin Excluded",
             xaxis_title="Date",
             yaxis_title="Value",
+            xaxis=dict(fixedrange=True),  # Disable zoom for x-axis
+            yaxis=dict(fixedrange=True),   # Disable zoom for y-axis
+            width=width_charts_total,
+            legend=dict(
+                orientation="h",  # horizontal legend
+                yanchor="top",
+                y=1.1,
+                xanchor="right",
+                x=1
+            )
         )
 
         # Display the Plotly chart using st.plotly_chart
         st.plotly_chart(fig_total3)
 
 
-
-    with col_1_3:
-        st.subheader('''
-        Total crypto market in in uptrend that has consolidated, but still above SMA 200, which indicates a bull market.
-                 ''')
-        st.write('Trend: 🔴    200 MA: 🟢')
-        st.divider()
-
+    with col_1_3alts:
         st.subheader('''
         Lorem Ipsum Total Altcoin Market still strong that has consolidated, but still above SMA 200.
                  ''')
         st.write('Trend: 🔴    200 MA: 🟢')
         st.divider()
+    ########
+    
+    row_column_widths = [2, 2]
+
+    col_tot,col_200 = st.columns(row_column_widths)
+    with col_tot:
+        source_trends = pd.DataFrame({"Trend Info": ['Uptrend','Downtrend','No trend data'], "value": [In_Uptrend,In_Downtrend,No_Trend_Info]})
+
+        chart_trends = alt.Chart(source_trends).mark_arc(innerRadius=0).encode(
+            theta="value",
+            color=alt.Color(field="Trend Info", type="nominal", scale=alt.Scale(range=['#d10819','#6e6e6e','#0baa02'])), 
+        )
+        # Display the chart using st.altair_chart
+        st.altair_chart(chart_trends, use_container_width=True)
+    
+    with col_200:
+    
+        source_mas = pd.DataFrame({"Position of 200 MA": ['Above 200 MA','Below 200 MA','No 200 MA data'], "value": [Above_200_MA,Below_200_MA,No_200_MA_info]})
+
+        chart_mas = alt.Chart(source_mas).mark_arc(innerRadius=0).encode(
+            theta="value",
+            color=alt.Color(field="Position of 200 MA", type="nominal", scale=alt.Scale(range=['#0baa02', '#d10819', '#6e6e6e'])), 
+        )
+        # Display the chart using st.altair_chart
+        st.altair_chart(chart_mas, use_container_width=True)
 
 page = st.sidebar.radio("Menu", ["Market Overview","Trends", "Market Caps"])
 
