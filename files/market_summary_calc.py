@@ -1,8 +1,15 @@
 import pandas as pd
 import sqlite3
-from datetime import datetime, timedelta
+import logging
+from fear_greed import get_fear_greed
 
-conn=sqlite3.connect('/home/entukio/projects/scrapper_crypto_top/files/top_500_with_mcap_stablecoins_excluded.db')
+files_path = '/home/entukio/projects/scrapper_crypto_top/files/'
+#files_path = 'C:/Users/Daniel/Desktop/Aplikacje Stepaniana/Crypto_Scrapper/Streamlit/TOP_500_data/TESTY/PROGRAM FOR SERVER FINAL/Streamlit/files/crypto_scrapper/scrapper_crypto_top/crypto_scrapper/scrapper_crypto_top/files/'
+
+logging.basicConfig(filename='MARKET_SUMMARY.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+conn=sqlite3.connect(f'{files_path}top_500_with_mcap_stablecoins_excluded.db')
 
 df_final=pd.read_sql_query('SELECT * FROM top_500_with_mcap_stablecoins_excluded',conn)
 
@@ -30,7 +37,20 @@ Above_200_MA = len(df_final[(df_final['current_Long_Trend_Up'] == True) & (df_fi
 Below_200_MA = len(df_final[(df_final['current_Long_Trend_Up'] == False) & (df_final['long_flip_date'].notna())])
 No_200_MA_info = Total_coins - Above_200_MA - Below_200_MA
 
-Fear_Greed = 76 ############################################
+Fear_Greed = None
+Fear_Greed_class = None
+Fear_Greed_update_time = None
+
+Fear_greed_fetch_object = get_fear_greed()
+if Fear_greed_fetch_object[0] == 1:
+    try:
+        Fear_Greed = Fear_greed_fetch_object[1]['fear_greed_value']
+        Fear_Greed_class = Fear_greed_fetch_object[1]['fear_greed_class']
+        Fear_Greed_update_time = Fear_greed_fetch_object[1]['fear_greed_update_time']
+    except Exception as e:
+        logging.error(f'Fear and greed error: {e}')
+elif Fear_greed_fetch_object[0] == 0:
+    logging.error(f'Fear and greed error: {Fear_greed_fetch_object[1]}')
 
 In_Uptrend_Perc = f'{round((In_Uptrend / Total_coins)*100,2)}%'
 In_Downtrend_Perc = f'{round((In_Downtrend / Total_coins)*100,2)}%'
@@ -50,6 +70,8 @@ df_summary = pd.DataFrame({
     'Below_200_MA': [Below_200_MA],
     'No_200_MA_info': [No_200_MA_info],
     'Fear_Greed': [Fear_Greed],
+    'Fear_Greed_update_time': [Fear_Greed_update_time],
+    'Fear_Greed_class': [Fear_Greed_class],
     'In_Uptrend_Perc': [In_Uptrend_Perc],
     'In_Downtrend_Perc': [In_Downtrend_Perc],
     'No_Trend_Perc': [No_Trend_Perc],
@@ -58,7 +80,7 @@ df_summary = pd.DataFrame({
     'No_200_MA_info_Perc': [No_200_MA_info_Perc]
 })
 
-conn1=sqlite3.connect('/home/entukio/projects/scrapper_crypto_top/files/market_overview.db')
+
+conn1=sqlite3.connect(f'{files_path}market_overview.db')
 
 df_summary.to_sql(f'market_overview',conn1,if_exists='append',index=False)
-
