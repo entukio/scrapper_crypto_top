@@ -2,11 +2,14 @@ import pandas as pd
 import sqlite3
 import logging
 from fear_greed import get_fear_greed
+import requests
+from bs4 import BeautifulSoup
+
 
 files_path = '/home/entukio/projects/scrapper_crypto_top/files/'
 #files_path = 'C:/Users/Daniel/Desktop/Aplikacje Stepaniana/Crypto_Scrapper/Streamlit/TOP_500_data/TESTY/PROGRAM FOR SERVER FINAL/Streamlit/files/crypto_scrapper/scrapper_crypto_top/crypto_scrapper/scrapper_crypto_top/files/'
 
-logging.basicConfig(filename='MARKET_SUMMARY.log', level=logging.INFO,
+logging.basicConfig(filename=f'{files_path}MARKET_SUMMARY.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 conn=sqlite3.connect(f'{files_path}top_500_with_mcap_stablecoins_excluded.db')
@@ -37,6 +40,7 @@ Above_200_MA = len(df_final[(df_final['current_Long_Trend_Up'] == True) & (df_fi
 Below_200_MA = len(df_final[(df_final['current_Long_Trend_Up'] == False) & (df_final['long_flip_date'].notna())])
 No_200_MA_info = Total_coins - Above_200_MA - Below_200_MA
 
+print('OOOOOOOOOOOOO')
 Fear_Greed = None
 Fear_Greed_class = None
 Fear_Greed_update_time = None
@@ -80,7 +84,41 @@ df_summary = pd.DataFrame({
     'No_200_MA_info_Perc': [No_200_MA_info_Perc]
 })
 
-
+print('EEEEEEEEEEE')
 conn1=sqlite3.connect(f'{files_path}market_overview.db')
 
 df_summary.to_sql(f'market_overview',conn1,if_exists='append',index=False)
+
+
+
+def get_totalMcaps(df_final):
+    try:
+        site = f'https://www.slickcharts.com/currency'
+        headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'}
+        res = requests.get(site,headers=headers)
+        soup = BeautifulSoup(res.text,'html.parser')
+        total1 = float(soup.find('h5',class_="text-center").text.split('$')[1].replace(',',''))
+        btc_mcap = df_final[df_final['Id'] == "Bitcoin_BTC"]['Mcap'].iloc[0]    
+        eth_mcap = df_final[df_final['Id'] == "Ethereum_ETH"]['Mcap'].iloc[0]
+        total2 = total1 - btc_mcap
+        total3 = total2 - eth_mcap
+        return [total1,total2,total3]
+    except Exception as e:
+        print('fail 1')
+        logging.error(f'TOTAL MCAP DOWNLOAD FAILED: {e}')
+        return [None,None,None]
+
+def update_mcap_csv():
+    total = pd.read_csv(f'{files_path}coin-dance-market-cap-historical.csv',delimiter=";")
+    new_total = get_totalMcaps(df_final)
+    pr = {"Date":pd.to_datetime([scraping_date]).date(),"Total1":[new_total[0]],"Total2":[new_total[1]],"Total3":[new_total[2]]}
+    new_row = pd.DataFrame(pr)
+    new_df = pd.concat([total,new_row],ignore_index=True)
+    new_df.to_csv(f'{files_path}coin-dance-market-cap-historical.csv',index=False,sep=";")
+
+try:
+    update_mcap_csv()
+    print('updated')
+except Exception as e:
+    logging.error(f'mcap file not updated: {e}')
+    print('fail 2')
