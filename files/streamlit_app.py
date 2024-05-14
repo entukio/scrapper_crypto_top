@@ -702,10 +702,6 @@ total = pd.read_csv(f'{files_path}coin-dance-market-cap-historical.csv',delimite
 def changeComma(x):
     return x.replace(',','.')
 
-total['Total1'] = total['Total1'].apply(changeComma)
-total['Total2'] = total['Total2'].apply(changeComma)
-total['Total3'] = total['Total3'].apply(changeComma)
-
 total['Total1'] = total['Total1'].astype(float)
 total['Total2'] = total['Total2'].astype(float)
 total['Total3'] = total['Total3'].astype(float)
