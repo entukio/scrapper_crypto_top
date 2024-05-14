@@ -348,6 +348,9 @@ def show_Trends(df_trends):
 
             )
 
+            fig_coin_1.update_xaxes(tickangle=0)
+
+
             # Display the Plotly chart using st.plotly_chart
             st.plotly_chart(fig_coin_1,config=plotly_config)
 
@@ -382,6 +385,9 @@ def show_Trends(df_trends):
 
                 )
 
+                fig_coin_2.update_xaxes(tickangle=0)
+
+
                 # Display the Plotly chart using st.plotly_chart
                 st.plotly_chart(fig_coin_2,config=plotly_config)
 
@@ -412,6 +418,9 @@ def show_Trends(df_trends):
                     yaxis=dict(fixedrange=True),  # Disable zoom for y-axis
 
                 )
+
+                fig_coin_3.update_xaxes(tickangle=0)
+
 
                 # Display the Plotly chart using st.plotly_chart
                 st.plotly_chart(fig_coin_3,config=plotly_config)
@@ -689,36 +698,39 @@ No_200_MA_info_Perc = df_overview.iloc[-1]['No_200_MA_info_Perc']
 
 # Total Market Caps
 total = pd.read_csv(f'{files_path}coin-dance-market-cap-historical.csv',delimiter=";")
-total = total.dropna().copy()
-total = total.rename(columns={'Label':'Date'}).copy()
-
 
 def changeComma(x):
     return x.replace(',','.')
 
-total = total.rename(columns={'Label':'Date'}).copy()
-total['Altcoin Market Cap'] = total['Altcoin Market Cap'].apply(changeComma)
-total['Bitcoin Market Cap'] = total['Bitcoin Market Cap'].apply(changeComma)
+total['Total1'] = total['Total1'].apply(changeComma)
+total['Total2'] = total['Total2'].apply(changeComma)
+total['Total3'] = total['Total3'].apply(changeComma)
 
-total3 = total[['Date','Altcoin Market Cap']]
-total3['Altcoin Market Cap'] = total3['Altcoin Market Cap'].astype(float)
+total['Total1'] = total['Total1'].astype(float)
+total['Total2'] = total['Total2'].astype(float)
+total['Total3'] = total['Total3'].astype(float)
+try:
+    total['Date'] = total['Date'].apply(lambda x: pd.to_datetime(x).date())
+except Exception as e:
+    print(f'Date conv eeror {e}')
 
-total3.loc[:, 'Altcoin Market Cap'] = pd.to_numeric(total3['Altcoin Market Cap'], errors='coerce')
+total2 = total[['Date','Total2']]
 
-total['Total Market Cap'] = total['Altcoin Market Cap'].astype(float) + total['Bitcoin Market Cap'].astype(float)
-total.drop(columns=['Altcoin Market Cap', 'Bitcoin Market Cap'], inplace=True)
+total2.loc[:, 'Total2'] = pd.to_numeric(total2['Total2'], errors='coerce')
 
-total['EMA23'] = total['Total Market Cap'].ewm(span=23, adjust=False,min_periods=23).mean()
-total['EMA56'] = total['Total Market Cap'].ewm(span=56, adjust=False,min_periods=56).mean()
-total['SMA200'] = total['Total Market Cap'].rolling(window=200).mean()
-total['Long_Trend_Up'] = total['Total Market Cap'] > total['SMA200']
+total.drop(columns=['Total3', 'Total2'], inplace=True)
+
+total['EMA23'] = total['Total1'].ewm(span=23, adjust=False,min_periods=23).mean()
+total['EMA56'] = total['Total1'].ewm(span=56, adjust=False,min_periods=56).mean()
+total['SMA200'] = total['Total1'].rolling(window=200).mean()
+total['Long_Trend_Up'] = total['Total1'] > total['SMA200']
 total['Middle_Trend_Up'] = total['EMA23'] > total['EMA56']
 
-total3['EMA23'] = total3.loc[:, 'Altcoin Market Cap'].ewm(span=23, adjust=False, min_periods=23).mean()
-total3['EMA56'] = total3.loc[:, 'Altcoin Market Cap'].ewm(span=56, adjust=False, min_periods=56).mean()
-total3['SMA200'] = total3.loc[:, 'Altcoin Market Cap'].rolling(window=200).mean()
-total3['Long_Trend_Up'] = total3['Altcoin Market Cap'] > total3['SMA200']
-total3['Middle_Trend_Up'] = total3['EMA23'] > total3['EMA56']
+total2['EMA23'] = total2.loc[:, 'Total2'].ewm(span=23, adjust=False, min_periods=23).mean()
+total2['EMA56'] = total2.loc[:, 'Total2'].ewm(span=56, adjust=False, min_periods=56).mean()
+total2['SMA200'] = total2.loc[:, 'Total2'].rolling(window=200).mean()
+total2['Long_Trend_Up'] = total2['Total2'] > total2['SMA200']
+total2['Middle_Trend_Up'] = total2['EMA23'] > total2['EMA56']
 
 
 # Conditional rendering based on the selected page
