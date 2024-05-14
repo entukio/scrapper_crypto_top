@@ -699,8 +699,16 @@ No_200_MA_info_Perc = df_overview.iloc[-1]['No_200_MA_info_Perc']
 # Total Market Caps
 total = pd.read_csv(f'{files_path}coin-dance-market-cap-historical.csv',delimiter=";")
 
+total['Total1'] = total['Total1'].astype(str)
+total['Total2'] = total['Total2'].astype(str)
+total['Total3'] = total['Total3'].astype(str)
+
 def changeComma(x):
     return x.replace(',','.')
+
+total['Total1'] = total['Total1'].apply(changeComma)
+total['Total2'] = total['Total2'].apply(changeComma)
+total['Total3'] = total['Total3'].apply(changeComma)
 
 total['Total1'] = total['Total1'].astype(float)
 total['Total2'] = total['Total2'].astype(float)
