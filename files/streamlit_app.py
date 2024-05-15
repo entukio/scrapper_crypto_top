@@ -497,10 +497,9 @@ def market_overview():
         st.subheader(f"Total Crypto Market Cap")
 
         total_last_30d = total.tail(30).copy()
-        total_last_30d['Total Market Cap'] = total_last_30d['Total Market Cap'].astype(float)
     
         color_map_total = {
-            "Total Market Cap": f"{chart_color_range[0]}",
+            "Total1": f"{chart_color_range[0]}",
             "SMA200": f"{chart_color_range[3]}",
             "EMA23": f"{chart_color_range[1]}",
             "EMA56": f"{chart_color_range[2]}",
@@ -511,7 +510,7 @@ def market_overview():
             total_last_30d,
             width=width_charts_total,
             x="Date",
-            y=["Total Market Cap", "SMA200", "EMA23", "EMA56"],  # Include all required columns
+            y=["Total1", "SMA200", "EMA23", "EMA56"],  # Include all required columns
             labels={"value": "Market Cap USD", "variable": "Indicator", "Date": "Date"},  # Customize axis labels
             color_discrete_map=color_map_total  # Specify custom colors
         )
@@ -543,7 +542,7 @@ def market_overview():
         st.subheader('''
         Total crypto market in in uptrend that has consolidated, but still above SMA 200, which indicates a bull market.
                  ''')
-        st.write('Trend: 🔴    200 MA: 🟢')
+        st.write(f'Trend: {total['Middle_Trend_Up'].iloc[-1]}    200 MA: {total['Long_Trend_Up'].iloc[-1]}')
         st.divider()
 
 
@@ -558,29 +557,27 @@ def market_overview():
 
         st.subheader(f"Altcoin Market Cap")
 
-        total3_last_30d = total3.tail(30).copy()
-        total3_last_30d['Altcoin Market Cap'] = total3_last_30d['Altcoin Market Cap'].astype(float)
-
+        total2_last_30d = total2.tail(30).copy()
       
-        color_map_total3 = {
-            "Altcoin Market Cap": f"{chart_color_range[0]}",
+        color_map_total2 = {
+            "Total2": f"{chart_color_range[0]}",
             "SMA200": f"{chart_color_range[3]}",
             "EMA23": f"{chart_color_range[1]}",
             "EMA56": f"{chart_color_range[2]}",
         }
 
         # Create a Plotly figure
-        fig_total3 = px.line(
-            total3_last_30d,
+        fig_total2 = px.line(
+            total2_last_30d,
             width=width_charts_total,
             x="Date",
-            y=["Altcoin Market Cap", "SMA200", "EMA23", "EMA56"],  # Include all required columns
+            y=["Total2", "SMA200", "EMA23", "EMA56"],  # Include all required columns
             labels={"value": "Market Cap USD", "variable": "Indicator", "Date": "Date"},  # Customize axis labels
-            color_discrete_map=color_map_total3  # Specify custom colors
+            color_discrete_map=color_map_total2  # Specify custom colors
         )
 
         # Customize the layout if needed
-        fig_total3.update_layout(
+        fig_total2.update_layout(
             title="Total Market Cap 2, Bitcoin Excluded",
             xaxis_title="Date",
             yaxis_title="Value",
@@ -597,14 +594,14 @@ def market_overview():
         )
 
         # Display the Plotly chart using st.plotly_chart
-        st.plotly_chart(fig_total3)
+        st.plotly_chart(fig_total2)
 
 
     with col_1_3alts:
         st.subheader('''
         Lorem Ipsum Total Altcoin Market still strong that has consolidated, but still above SMA 200.
                  ''')
-        st.write('Trend: 🔴    200 MA: 🟢')
+        st.write(f'Trend: {total2['Middle_Trend_Up'].iloc[-1]}    200 MA: {total2['Long_Trend_Up'].iloc[-1]}')
         st.divider()
     ########
     
@@ -729,12 +726,15 @@ total['EMA56'] = total['Total1'].ewm(span=56, adjust=False,min_periods=56).mean(
 total['SMA200'] = total['Total1'].rolling(window=200).mean()
 total['Long_Trend_Up'] = total['Total1'] > total['SMA200']
 total['Middle_Trend_Up'] = total['EMA23'] > total['EMA56']
+total = total.applymap(replace_boolean_with_icons)
+
 
 total2['EMA23'] = total2.loc[:, 'Total2'].ewm(span=23, adjust=False, min_periods=23).mean()
 total2['EMA56'] = total2.loc[:, 'Total2'].ewm(span=56, adjust=False, min_periods=56).mean()
 total2['SMA200'] = total2.loc[:, 'Total2'].rolling(window=200).mean()
 total2['Long_Trend_Up'] = total2['Total2'] > total2['SMA200']
 total2['Middle_Trend_Up'] = total2['EMA23'] > total2['EMA56']
+total2 = total2.applymap(replace_boolean_with_icons)
 
 
 # Conditional rendering based on the selected page
