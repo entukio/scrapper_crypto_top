@@ -43,8 +43,8 @@ class CryptoScraping:
         except Exception as e:
             print(e)
     def scrap_all(self):
-        print('scrapping 10 pages...')
-        for i in range(1,11):
+        print('scrapping 6  pages...')
+        for i in range(1,7):
             self.scrap(i)
             time.sleep(2)
 

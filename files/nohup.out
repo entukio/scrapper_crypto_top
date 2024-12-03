@@ -62,3 +62,32 @@ Collecting usage statistics. To deactivate, set browser.gatherUsageStats to Fals
   Network URL: http://10.132.0.3:8503
   External URL: http://34.77.76.246:8503
 
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://10.132.0.3:8504
+  External URL: http://34.77.76.246:8504
+
+  Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://10.132.0.3:8504
+  External URL: http://34.77.76.246:8504
+
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://10.132.0.3:8505
+  External URL: http://34.77.76.246:8505
+
+  Stopping...

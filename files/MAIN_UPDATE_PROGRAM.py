@@ -303,10 +303,10 @@ def MapperLooper(asset_book):
       
             except Exception as e:
                 logging.error(f'PROGRAM ERROR - {identifier}:{e}')
-
+                continue
         except Exception as e:
             logging.error(f'FATAL error in Mapper program for {identifier},{e}')
-
+            continue
 
 # # # # # # # # # #  # # # # #  # # # # # #
 # # # # # # # # # #  # # # # #  # # # # # 
